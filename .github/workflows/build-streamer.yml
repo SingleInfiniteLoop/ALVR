@@ -1,0 +1,87 @@
+name: Build streamer
+
+env:
+  CARGO_TERM_COLOR: always
+
+on: workflow_dispatch
+
+jobs:
+  build_windows_streamer:
+    runs-on: windows-2019
+    env:
+      # For bindgen to find libclang.dll, we need to give it the path to the Visual Studio package.
+      # This is specific to the GitHub windows-2019 runner.
+      LIBCLANG_PATH: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Tools\Llvm\x64\bin'
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - uses: crazy-max/ghaction-chocolatey@v1
+        with:
+          args: install zip unzip pkgconfiglite wixtoolset
+
+      - name: Build and package ALVR
+        id: build
+        env:
+          RUST_BACKTRACE: 1
+        run: |
+          cargo xtask package-streamer --gpl --ci
+          cargo xtask package-launcher --ci
+
+      - name: Upload streamer
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./build/alvr_streamer_windows.zip
+          name: alvr_streamer_windows.zip
+      - name: Upload launcher
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./build/alvr_launcher_windows.zip
+          name: alvr_launcher_windows.zip
+
+  build_linux_streamer:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Build and install dependencies
+        env:
+          RUST_BACKTRACE: 1
+        run: |
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 25088A0359807596
+          echo "deb http://ppa.launchpad.net/pipewire-debian/pipewire-upstream/ubuntu $(lsb_release -cs) main" | sudo tee -a /etc/apt/sources.list.d/pipewire-upstream.list
+          sudo apt-get update
+          sudo apt-get install libfuse2 build-essential pkg-config nasm libva-dev libdrm-dev libvulkan-dev libx264-dev libx265-dev cmake libasound2-dev libjack-jackd2-dev libxrandr-dev libunwind-dev libffmpeg-nvenc-dev nvidia-cuda-toolkit libgtk-3-dev libpipewire-0.3-dev libspa-0.2-dev
+          cp alvr/xtask/deb/cuda.pc /usr/share/pkgconfig
+
+      - name: Build and package ALVR (.tar.gz)
+        id: build
+        env:
+          RUST_BACKTRACE: 1
+        run: |
+          cargo xtask package-streamer --gpl --ci
+          cargo xtask package-launcher --ci
+
+      - name: Upload streamer (tar.gz)
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./build/alvr_streamer_linux.tar.gz
+          name: alvr_streamer_linux.tar.gz
+      - name: Upload launcher
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./build/alvr_launcher_linux.tar.gz
+          name: alvr_launcher_linux.tar.gz
