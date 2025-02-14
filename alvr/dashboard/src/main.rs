@@ -64,14 +64,14 @@ fn main() {
 
     data_sources::clean_session();
 
-    if data_sources::get_read_only_local_session()
+    /*if data_sources::get_read_only_local_session()
         .settings()
         .extra
         .steamvr_launcher
         .open_close_steamvr_with_dashboard
     {
         steamvr_launcher::LAUNCHER.lock().launch_steamvr()
-    }
+    }*/
 
     let ico = IconDir::read(Cursor::new(include_bytes!("../resources/dashboard.ico"))).unwrap();
     let image = ico.entries().first().unwrap().decode().unwrap();

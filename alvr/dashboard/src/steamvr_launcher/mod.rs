@@ -3,22 +3,20 @@ mod linux_steamvr;
 #[cfg(windows)]
 mod windows_steamvr;
 
-use crate::data_sources;
-use alvr_adb::commands as adb;
+/*use crate::data_sources;
+use alvr_adb::commands as adb;*/
 use alvr_common::{
-    anyhow::{Context, Result},
-    debug, error,
-    glam::bool,
-    parking_lot::Mutex,
-    warn,
+    /*anyhow::{Context, Result},*/
+    debug, glam::bool, parking_lot::Mutex,
+    /*error, warn,*/
 };
 use alvr_filesystem::{self as afs};
-use serde_json::{self, json};
+/*use serde_json::{self, json};*/
 use std::{
     ffi::OsStr,
-    fs,
+    /*fs,*/
     marker::PhantomData,
-    process::Command,
+    /*process::Command,*/
     thread,
     time::{Duration, Instant},
 };
@@ -30,7 +28,7 @@ const SHUTDOWN_TIMEOUT: Duration = Duration::from_secs(10);
 // kill(pid, 0), which vrmonitor's single-instance check runs on the last holder
 // of its semaphore. An unreaped child blocks every later launch until this
 // process exits.
-pub(super) fn spawn_and_reap(command: &mut Command) -> Result<()> {
+/*pub(super) fn spawn_and_reap(command: &mut Command) -> Result<()> {
     let mut child = command.spawn()?;
 
     thread::spawn(move || {
@@ -40,7 +38,7 @@ pub(super) fn spawn_and_reap(command: &mut Command) -> Result<()> {
     Ok(())
 }
 const DRIVER_KEY: &str = "driver_alvr_server";
-const BLOCKED_KEY: &str = "blocked_by_safe_mode";
+const BLOCKED_KEY: &str = "blocked_by_safe_mode";*/
 
 pub fn is_steamvr_running() -> bool {
     System::new_all()
@@ -79,7 +77,7 @@ pub fn maybe_kill_steamvr() {
     }
 }
 
-fn unblock_alvr_driver() -> Result<()> {
+/*fn unblock_alvr_driver() -> Result<()> {
     if !cfg!(target_os = "linux") {
         return Ok(());
     }
@@ -120,14 +118,14 @@ fn unblock_alvr_driver_within_vrsettings(text: &str) -> Result<String> {
     }
 
     Ok(serde_json::to_string_pretty(&settings)?)
-}
+}*/
 
 pub struct Launcher {
     _phantom: PhantomData<()>,
 }
 
 impl Launcher {
-    pub fn launch_steamvr(&self) {
+    /*pub fn launch_steamvr(&self) {
         // The ADB server might be left running because of an unclean termination of SteamVR.
         // Kill it unconditionally to ensure clean state, regardless of current connection mode.
         // Note: this will also kill a system-wide ADB server not started by ALVR.
@@ -212,7 +210,7 @@ impl Launcher {
             #[cfg(target_os = "linux")]
             linux_steamvr::launch_steamvr_with_steam();
         }
-    }
+    }*/
 
     pub fn ensure_steamvr_shutdown(&self) {
         debug!("Waiting for SteamVR to shutdown...");
@@ -226,7 +224,7 @@ impl Launcher {
 
     pub fn restart_steamvr(&self) {
         self.ensure_steamvr_shutdown();
-        self.launch_steamvr();
+        /*self.launch_steamvr();*/
     }
 }
 

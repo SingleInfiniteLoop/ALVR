@@ -6,7 +6,7 @@ use alvr_common::{
     warn,
 };
 use alvr_events::{Event, EventType};
-use alvr_packets::FirewallRulesAction;
+/*use alvr_packets::FirewallRulesAction;*/
 use alvr_server_io::ServerSessionManager;
 use eframe::egui;
 use serde::Serialize;
@@ -76,9 +76,9 @@ pub fn clean_session() {
 }
 
 // Disallows all methods for mutating (and overwriting to disk) the session
-pub fn get_read_only_local_session() -> Arc<ServerSessionManager> {
+/*pub fn get_read_only_local_session() -> Arc<ServerSessionManager> {
     Arc::new(get_local_session_source())
-}
+}*/
 
 fn report_event_local(
     context: &egui::Context,
@@ -131,7 +131,7 @@ impl DataSources {
         events_sender: mpsc::Sender<PolledEvent>,
         events_receiver: mpsc::Receiver<PolledEvent>,
     ) -> Self {
-        let filesystem_layout = crate::get_filesystem_layout();
+        /*let filesystem_layout = crate::get_filesystem_layout();*/
 
         let running = Arc::new(RelaxedAtomic::new(true));
         let (requests_sender, requests_receiver) = mpsc::channel();
@@ -248,27 +248,27 @@ impl DataSources {
                                     report_session_local(&context, &events_sender, session_manager);
                                 }
                                 ServerRequest::AddFirewallRules => {
-                                    if let Err(e) = alvr_server_io::firewall_rules(
+                                    /*if let Err(e) = alvr_server_io::firewall_rules(
                                         FirewallRulesAction::Add,
                                         &filesystem_layout,
                                     ) {
                                         error!("Failed to add firewall rules! code: {e}");
                                     } else {
                                         info!("Successfully added firewall rules!");
-                                    }
+                                    }*/
                                 }
                                 ServerRequest::RemoveFirewallRules => {
-                                    if let Err(e) = alvr_server_io::firewall_rules(
+                                    /*if let Err(e) = alvr_server_io::firewall_rules(
                                         FirewallRulesAction::Remove,
                                         &filesystem_layout,
                                     ) {
                                         error!("Failed to remove firewall rules! code: {e}");
                                     } else {
                                         info!("Successfully removed firewall rules!");
-                                    }
+                                    }*/
                                 }
                                 ServerRequest::RegisterAlvrDriver => {
-                                    let alvr_driver_dir =
+                                    /*let alvr_driver_dir =
                                         filesystem_layout.openvr_driver_root_dir.clone();
 
                                     alvr_server_io::driver_registration(&[alvr_driver_dir], true)
@@ -280,10 +280,10 @@ impl DataSources {
                                             &events_sender,
                                             EventType::DriversList(list),
                                         )
-                                    }
+                                    }*/
                                 }
-                                ServerRequest::UnregisterDriver(path) => {
-                                    alvr_server_io::driver_registration(&[path], false).ok();
+                                ServerRequest::UnregisterDriver(_path) => {
+                                    /*alvr_server_io::driver_registration(&[path], false).ok();
 
                                     if let Ok(list) = alvr_server_io::get_registered_drivers() {
                                         report_event_local(
@@ -291,7 +291,7 @@ impl DataSources {
                                             &events_sender,
                                             EventType::DriversList(list),
                                         )
-                                    }
+                                    }*/
                                 }
                                 ServerRequest::GetDriverList => {
                                     if let Ok(list) = alvr_server_io::get_registered_drivers() {

@@ -1,10 +1,10 @@
 use crate::{
-    ConnectionContext, FILESYSTEM_LAYOUT, SESSION_MANAGER, ServerCoreEvent,
+    ConnectionContext, /*FILESYSTEM_LAYOUT,*/ SESSION_MANAGER, ServerCoreEvent,
     logging_backend::EVENTS_SENDER,
 };
 use alvr_common::{ConnectionState, LogEntry, anyhow::Result, error, info, log};
 use alvr_events::{ButtonEvent, EventType};
-use alvr_packets::{ButtonEntry, ClientConnectionsAction, FirewallRulesAction, PathValuePair};
+use alvr_packets::{ButtonEntry, ClientConnectionsAction, /*FirewallRulesAction,*/ PathValuePair};
 use alvr_session::SessionConfig;
 use axum::{
     Json, Router,
@@ -20,7 +20,7 @@ use axum::{
 use serde_json as json;
 use std::{
     net::{Ipv4Addr, SocketAddr},
-    path::PathBuf,
+    /*path::PathBuf,*/
     sync::Arc,
 };
 use tokio::{net::TcpListener, sync::broadcast::error::RecvError};
@@ -98,18 +98,18 @@ pub async fn web_server(connection_context: Arc<ConnectionContext>) -> Result<()
                         .route("/start", routing::post(start_recording))
                         .route("/stop", routing::post(stop_recording)),
                 )
-                .nest(
+                /*.nest(
                     "/firewall-rules",
                     Router::new()
                         .route("/add", routing::post(add_firewall_rules))
                         .route("/remove", routing::post(remove_firewall_rules)),
-                )
+                )*/
                 .nest(
                     "/drivers",
                     Router::new()
                         .route("/", routing::get(get_driver_list))
-                        .route("/register-alvr", routing::post(register_alvr_driver))
-                        .route("/unregister", routing::post(unregister_driver)),
+                        /*.route("/register-alvr", routing::post(register_alvr_driver))
+                        .route("/unregister", routing::post(unregister_driver)),*/
                 )
                 .nest(
                     "/steamvr",
@@ -218,7 +218,7 @@ async fn stop_recording(State(ctx): State<Arc<ConnectionContext>>) {
     *ctx.video_recording_file.lock() = None;
 }
 
-async fn add_firewall_rules() {
+/*async fn add_firewall_rules() {
     if let Err(e) =
         alvr_server_io::firewall_rules(FirewallRulesAction::Add, FILESYSTEM_LAYOUT.get().unwrap())
     {
@@ -237,7 +237,7 @@ async fn remove_firewall_rules() {
     } else {
         info!("Successfully removed firewall rules!");
     }
-}
+}*/
 
 async fn get_driver_list() {
     if let Ok(list) = alvr_server_io::get_registered_drivers() {
@@ -245,7 +245,7 @@ async fn get_driver_list() {
     }
 }
 
-async fn register_alvr_driver() {
+/*async fn register_alvr_driver() {
     alvr_server_io::driver_registration(
         &[FILESYSTEM_LAYOUT
             .get()
@@ -267,7 +267,7 @@ async fn unregister_driver(Json(path): Json<PathBuf>) {
     if let Ok(list) = alvr_server_io::get_registered_drivers() {
         alvr_events::send_event(EventType::DriversList(list));
     }
-}
+}*/
 
 async fn restart_steamvr(State(ctx): State<Arc<ConnectionContext>>) {
     ctx.events_sender.send(ServerCoreEvent::RestartPending).ok();

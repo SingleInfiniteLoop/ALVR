@@ -1,23 +1,23 @@
-use std::fs;
+/*use std::fs;
 use std::path::Path;
 use std::process::Command;
 
 use alvr_common::anyhow::bail;
-use alvr_common::{debug, error, info, warn};
+use alvr_common::{debug, error, info, warn};*/
 use sysinfo::Process;
 
-pub fn launch_steamvr_with_steam() {
+/*pub fn launch_steamvr_with_steam() {
     if let Err(e) = super::spawn_and_reap(Command::new("steam").args(["steam://rungameid/250820"]))
     {
         error!("Failed to launch SteamVR through Steam: {e}");
     }
-}
+}*/
 
 pub fn terminate_process(process: &Process) {
     process.kill_with(sysinfo::Signal::Term);
 }
 
-pub fn maybe_wrap_vrcompositor_launcher() -> alvr_common::anyhow::Result<()> {
+/*pub fn maybe_wrap_vrcompositor_launcher() -> alvr_common::anyhow::Result<()> {
     let steamvr_bin_dir = alvr_server_io::steamvr_root_dir()?
         .join("bin")
         .join("linux64");
@@ -358,4 +358,4 @@ fn probe_libva_encoder_profile(
             );
         }
     }
-}
+}*/

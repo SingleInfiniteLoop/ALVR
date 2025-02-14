@@ -5,7 +5,7 @@ use alvr_common::{
 use encoding_rs_io::DecodeReaderBytes;
 use serde_json as json;
 use std::{
-    fs::{self, File},
+    fs::{/*self,*/ File},
     io::Read,
     path::PathBuf,
 };
@@ -26,7 +26,7 @@ fn openvr_source_file_path() -> Result<PathBuf> {
     }
 }
 
-pub fn steamvr_settings_file_path() -> Result<PathBuf> {
+/*pub fn steamvr_settings_file_path() -> Result<PathBuf> {
     let path = if cfg!(windows) {
         // N.B. if ever implementing this: given Steam can be installed on another
         // drive, etc., this should probably start by looking at Windows registry keys.
@@ -42,7 +42,7 @@ pub fn steamvr_settings_file_path() -> Result<PathBuf> {
     } else {
         bail!("{} does not exist", path.to_string_lossy())
     }
-}
+}*/
 
 pub fn load_openvr_paths_json() -> Result<json::Value> {
     let file = File::open(openvr_source_file_path()?)?;
@@ -55,13 +55,13 @@ pub fn load_openvr_paths_json() -> Result<json::Value> {
     Ok(value)
 }
 
-pub fn save_openvr_paths_json(openvr_paths: &json::Value) -> Result<()> {
+/*pub fn save_openvr_paths_json(openvr_paths: &json::Value) -> Result<()> {
     let file_content = json::to_string_pretty(openvr_paths)?;
 
     fs::write(openvr_source_file_path()?, file_content)?;
 
     Ok(())
-}
+}*/
 
 pub fn from_openvr_paths(paths: &json::Value) -> Vec<std::path::PathBuf> {
     let Some(paths_vec) = paths.as_array() else {

@@ -46,7 +46,7 @@ impl InstallationTab {
             if ui.button("Run setup wizard").clicked() {
                 requests.push(InstallationTabRequest::OpenSetupWizard);
             }
-            ui.columns(2, |ui| {
+            /*ui.columns(2, |ui| {
                 if ui[0].button("Add firewall rules").clicked() {
                     requests.push(InstallationTabRequest::ServerRequest(
                         ServerRequest::AddFirewallRules,
@@ -57,7 +57,7 @@ impl InstallationTab {
                         ServerRequest::RemoveFirewallRules,
                     ));
                 }
-            });
+            });*/
 
             Frame::group(ui.style())
                 .fill(theme::SECTION_BG)
@@ -67,13 +67,13 @@ impl InstallationTab {
                         ui.label(RichText::new("Registered drivers").size(18.0));
                     });
 
-                    Grid::new(0).num_columns(2).show(ui, |ui| {
+                    Grid::new(0).num_columns(1).show(ui, |ui| {
                         for driver_path in &self.drivers {
-                            if ui.button("Remove").clicked() {
+                            /*if ui.button("Remove").clicked() {
                                 requests.push(InstallationTabRequest::ServerRequest(
                                     ServerRequest::UnregisterDriver(driver_path.clone()),
                                 ));
-                            }
+                            }*/
 
                             ScrollArea::new([true, false])
                                 .auto_shrink([false, false])
@@ -85,11 +85,11 @@ impl InstallationTab {
                         }
                     });
 
-                    if ui.button("Register ALVR driver").clicked() {
+                    /*if ui.button("Register ALVR driver").clicked() {
                         requests.push(InstallationTabRequest::ServerRequest(
                             ServerRequest::RegisterAlvrDriver,
                         ));
-                    }
+                    }*/
                 });
         });
 
