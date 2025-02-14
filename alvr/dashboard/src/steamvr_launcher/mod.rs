@@ -3,12 +3,12 @@ mod linux_steamvr;
 #[cfg(windows)]
 mod windows_steamvr;
 
-use crate::data_sources;
+/*use crate::data_sources;*/
 use alvr_common::{debug, glam::bool, once_cell::sync::Lazy, parking_lot::Mutex};
 use alvr_filesystem as afs;
-use alvr_session::{DriverLaunchAction, DriversBackup};
+/*use alvr_session::{DriverLaunchAction, DriversBackup};*/
 use std::{
-    env,
+    /*env,*/
     ffi::OsStr,
     marker::PhantomData,
     thread,
@@ -70,7 +70,7 @@ pub struct Launcher {
 }
 
 impl Launcher {
-    pub fn launch_steamvr(&self) {
+    /*pub fn launch_steamvr(&self) {
         #[cfg(target_os = "linux")]
         linux_steamvr::linux_hardware_checks();
 
@@ -126,7 +126,7 @@ impl Launcher {
             #[cfg(target_os = "linux")]
             linux_steamvr::start_steamvr();
         }
-    }
+    }*/
 
     pub fn ensure_steamvr_shutdown(&self) {
         debug!("Waiting for SteamVR to shutdown...");
@@ -140,7 +140,7 @@ impl Launcher {
 
     pub fn restart_steamvr(&self) {
         self.ensure_steamvr_shutdown();
-        self.launch_steamvr();
+        /*self.launch_steamvr();*/
     }
 }
 
