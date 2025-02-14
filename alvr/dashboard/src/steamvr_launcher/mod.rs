@@ -3,22 +3,19 @@ mod linux_steamvr;
 #[cfg(windows)]
 mod windows_steamvr;
 
-use crate::data_sources;
+/*use crate::data_sources;*/
 use alvr_common::{
-    anyhow::{Context, Result},
-    debug,
-    glam::bool,
-    once_cell::sync::Lazy,
-    parking_lot::Mutex,
-    warn,
+    /*anyhow::{Context, Result},*/
+    debug, glam::bool, once_cell::sync::Lazy, parking_lot::Mutex,
+    /*warn,*/
 };
 use alvr_filesystem as afs;
-use alvr_session::{DriverLaunchAction, DriversBackup};
-use serde_json::{self, json};
+/*use alvr_session::{DriverLaunchAction, DriversBackup};
+use serde_json::{self, json};*/
 use std::{
-    env,
+    /*env,*/
     ffi::OsStr,
-    fs,
+    /*fs,*/
     marker::PhantomData,
     thread,
     time::{Duration, Instant},
@@ -26,8 +23,8 @@ use std::{
 use sysinfo::{ProcessRefreshKind, ProcessesToUpdate, RefreshKind, System};
 
 const SHUTDOWN_TIMEOUT: Duration = Duration::from_secs(10);
-const DRIVER_KEY: &str = "driver_alvr_server";
-const BLOCKED_KEY: &str = "blocked_by_safe_mode";
+/*const DRIVER_KEY: &str = "driver_alvr_server";
+const BLOCKED_KEY: &str = "blocked_by_safe_mode";*/
 
 pub fn is_steamvr_running() -> bool {
     let mut system = System::new_with_specifics(
@@ -76,7 +73,7 @@ pub fn maybe_kill_steamvr() {
     }
 }
 
-fn unblock_alvr_driver() -> Result<()> {
+/*fn unblock_alvr_driver() -> Result<()> {
     if !cfg!(target_os = "linux") {
         return Ok(());
     }
@@ -117,14 +114,14 @@ fn unblock_alvr_driver_within_vrsettings(text: &str) -> Result<String> {
     }
 
     Ok(serde_json::to_string_pretty(&settings)?)
-}
+}*/
 
 pub struct Launcher {
     _phantom: PhantomData<()>,
 }
 
 impl Launcher {
-    pub fn launch_steamvr(&self) {
+    /*pub fn launch_steamvr(&self) {
         #[cfg(target_os = "linux")]
         linux_steamvr::linux_hardware_checks();
 
@@ -184,7 +181,7 @@ impl Launcher {
             #[cfg(target_os = "linux")]
             linux_steamvr::start_steamvr();
         }
-    }
+    }*/
 
     pub fn ensure_steamvr_shutdown(&self) {
         debug!("Waiting for SteamVR to shutdown...");
@@ -198,7 +195,7 @@ impl Launcher {
 
     pub fn restart_steamvr(&self) {
         self.ensure_steamvr_shutdown();
-        self.launch_steamvr();
+        /*self.launch_steamvr();*/
     }
 }
 

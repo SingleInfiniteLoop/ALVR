@@ -138,15 +138,15 @@ impl DataSources {
                                         )
                                     }
                                 }
-                                ServerRequest::FirewallRules(action) => {
-                                    if alvr_server_io::firewall_rules(action).is_ok() {
+                                ServerRequest::FirewallRules(_action) => {
+                                    /*if alvr_server_io::firewall_rules(action).is_ok() {
                                         info!("Setting firewall rules succeeded!");
                                     } else {
                                         error!("Setting firewall rules failed!");
-                                    }
+                                    }*/
                                 }
                                 ServerRequest::RegisterAlvrDriver => {
-                                    let alvr_driver_dir =
+                                    /*let alvr_driver_dir =
                                         alvr_filesystem::filesystem_layout_from_dashboard_exe(
                                             &env::current_exe().unwrap(),
                                         )
@@ -161,10 +161,10 @@ impl DataSources {
                                             &events_sender,
                                             EventType::DriversList(list),
                                         )
-                                    }
+                                    }*/
                                 }
-                                ServerRequest::UnregisterDriver(path) => {
-                                    alvr_server_io::driver_registration(&[path], false).ok();
+                                ServerRequest::UnregisterDriver(_path) => {
+                                    /*alvr_server_io::driver_registration(&[path], false).ok();
 
                                     if let Ok(list) = alvr_server_io::get_registered_drivers() {
                                         report_event_local(
@@ -172,7 +172,7 @@ impl DataSources {
                                             &events_sender,
                                             EventType::DriversList(list),
                                         )
-                                    }
+                                    }*/
                                 }
                                 ServerRequest::GetDriverList => {
                                     if let Ok(list) = alvr_server_io::get_registered_drivers() {
