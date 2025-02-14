@@ -727,15 +727,18 @@ fn connection_pipeline(
     };
 
     #[cfg_attr(target_os = "linux", allow(unused_variables))]
-    let game_audio_sample_rate = if let Switch::Enabled(game_audio_config) =
-        &initial_settings.audio.game_audio
-    {
-        #[cfg(not(target_os = "linux"))]
-        {
-            let game_audio_device =
-                alvr_audio::AudioDevice::new_output(game_audio_config.device.as_ref()).to_con()?;
+    let game_audio_sample_rate =
+        if let Switch::Enabled(game_audio_config) = &initial_settings.audio.game_audio {
+            let game_audio_device = alvr_audio::AudioDevice::new_output(
+                Some(initial_settings.audio.linux_backend),
+                game_audio_config.device.as_ref(),
+            )
+            .to_con()?;
+
+            #[cfg(not(target_os = "linux"))]
             if let Switch::Enabled(microphone_config) = &initial_settings.audio.microphone {
                 let (sink, source) = alvr_audio::AudioDevice::new_virtual_microphone_pair(
+                    None,
                     microphone_config.devices.clone(),
                 )
                 .to_con()?;
@@ -757,12 +760,9 @@ fn connection_pipeline(
             }
 
             game_audio_device.input_sample_rate().to_con()?
-        }
-        #[cfg(target_os = "linux")]
-        44100
-    } else {
-        0
-    };
+        } else {
+            0
+        };
 
     let wired = client_ip.is_loopback();
 
@@ -888,31 +888,18 @@ fn connection_pipeline(
     });
 
     #[cfg_attr(target_os = "linux", allow(unused_variables))]
-    let game_audio_thread = if let Switch::Enabled(config) =
-        initial_settings.audio.game_audio.clone()
-    {
-        #[cfg(windows)]
-        let ctx = Arc::clone(&ctx);
+    let game_audio_thread =
+        if let Switch::Enabled(config) = initial_settings.audio.game_audio.clone() {
+            #[cfg(windows)]
+            let ctx = Arc::clone(&ctx);
 
-        let client_hostname = client_hostname.clone();
-        thread::spawn(move || {
-            while is_streaming(&client_hostname) {
-                #[cfg(target_os = "linux")]
-                if let Err(e) = alvr_audio::linux::record_audio_blocking_pipewire(
-                    Arc::new({
-                        let client_hostname = client_hostname.clone();
-                        move || is_streaming(&client_hostname)
-                    }),
-                    game_audio_sender.clone(),
-                    2,
-                    game_audio_sample_rate,
-                ) {
-                    error!("Audio record error: {e:?}");
-                }
-
-                #[cfg(not(target_os = "linux"))]
-                {
-                    let device = match alvr_audio::AudioDevice::new_output(config.device.as_ref()) {
+            let client_hostname = client_hostname.clone();
+            thread::spawn(move || {
+                while is_streaming(&client_hostname) {
+                    let device = match alvr_audio::AudioDevice::new_output(
+                        Some(initial_settings.audio.linux_backend),
+                        config.device.as_ref(),
+                    ) {
                         Ok(data) => data,
                         Err(e) => {
                             warn!("New audio device failed: {e:?}");
@@ -951,7 +938,7 @@ fn connection_pipeline(
                     }
 
                     #[cfg(windows)]
-                    if let Ok(id) = alvr_audio::AudioDevice::new_output(None)
+                    if let Ok(id) = alvr_audio::AudioDevice::new_output(None, None)
                         .and_then(|d| alvr_audio::get_windows_device_id(&d))
                     {
                         let prop = alvr_session::OpenvrProperty {
@@ -966,18 +953,19 @@ fn connection_pipeline(
                             .ok();
                     }
                 }
-            }
-        })
-    } else {
-        thread::spawn(|| ())
-    };
+            })
+        } else {
+            thread::spawn(|| ())
+        };
 
     let microphone_thread =
         if let Switch::Enabled(config) = initial_settings.audio.microphone.clone() {
-            #[cfg(not(target_os = "linux"))]
             #[allow(unused_variables)]
-            let (sink, source) =
-                alvr_audio::AudioDevice::new_virtual_microphone_pair(config.devices).to_con()?;
+            let (sink, source) = alvr_audio::AudioDevice::new_virtual_microphone_pair(
+                Some(initial_settings.audio.linux_backend),
+                config.devices,
+            )
+            .to_con()?;
 
             #[cfg(windows)]
             if let Ok(id) = alvr_audio::get_windows_device_id(&source) {
@@ -994,24 +982,12 @@ fn connection_pipeline(
 
             let client_hostname = client_hostname.clone();
             thread::spawn(move || {
-                #[cfg(not(target_os = "linux"))]
                 alvr_common::show_err(alvr_audio::play_audio_loop(
                     {
                         let client_hostname = client_hostname.clone();
                         move || is_streaming(&client_hostname)
                     },
                     &sink,
-                    1,
-                    streaming_caps.microphone_sample_rate,
-                    config.buffering,
-                    &mut microphone_receiver,
-                ));
-                #[cfg(target_os = "linux")]
-                alvr_common::show_err(alvr_audio::linux::play_microphone_loop_pipewire(
-                    {
-                        let client_hostname = client_hostname.clone();
-                        move || is_streaming(&client_hostname)
-                    },
                     1,
                     streaming_caps.microphone_sample_rate,
                     config.buffering,
