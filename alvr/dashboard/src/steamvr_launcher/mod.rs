@@ -4,18 +4,15 @@ mod linux_steamvr;
 mod windows_steamvr;
 
 use alvr_common::{
-    anyhow::{Context, Result},
-    debug,
-    glam::bool,
-    once_cell::sync::Lazy,
-    parking_lot::Mutex,
-    warn,
+    /*anyhow::{Context, Result},*/
+    debug, glam::bool, once_cell::sync::Lazy, parking_lot::Mutex,
+    /*warn,*/
 };
 use alvr_filesystem as afs;
-use serde_json::{self, json};
+/*use serde_json::{self, json};*/
 use std::{
     ffi::OsStr,
-    fs,
+    /*fs,*/
     marker::PhantomData,
     thread,
     time::{Duration, Instant},
@@ -23,8 +20,8 @@ use std::{
 use sysinfo::{ProcessesToUpdate, System};
 
 const SHUTDOWN_TIMEOUT: Duration = Duration::from_secs(10);
-const DRIVER_KEY: &str = "driver_alvr_server";
-const BLOCKED_KEY: &str = "blocked_by_safe_mode";
+/*const DRIVER_KEY: &str = "driver_alvr_server";
+const BLOCKED_KEY: &str = "blocked_by_safe_mode";*/
 
 pub fn is_steamvr_running() -> bool {
     System::new_all()
@@ -63,7 +60,7 @@ pub fn maybe_kill_steamvr() {
     }
 }
 
-fn unblock_alvr_driver() -> Result<()> {
+/*fn unblock_alvr_driver() -> Result<()> {
     if !cfg!(target_os = "linux") {
         return Ok(());
     }
@@ -104,14 +101,14 @@ fn unblock_alvr_driver_within_vrsettings(text: &str) -> Result<String> {
     }
 
     Ok(serde_json::to_string_pretty(&settings)?)
-}
+}*/
 
 pub struct Launcher {
     _phantom: PhantomData<()>,
 }
 
 impl Launcher {
-    pub fn launch_steamvr(&self) {
+    /*pub fn launch_steamvr(&self) {
         #[cfg(target_os = "linux")]
         linux_steamvr::linux_hardware_checks();
 
@@ -151,7 +148,7 @@ impl Launcher {
             #[cfg(target_os = "linux")]
             linux_steamvr::start_steamvr();
         }
-    }
+    }*/
 
     pub fn ensure_steamvr_shutdown(&self) {
         debug!("Waiting for SteamVR to shutdown...");
@@ -165,7 +162,7 @@ impl Launcher {
 
     pub fn restart_steamvr(&self) {
         self.ensure_steamvr_shutdown();
-        self.launch_steamvr();
+        /*self.launch_steamvr();*/
     }
 }
 

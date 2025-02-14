@@ -78,7 +78,7 @@ impl DataSources {
         events_sender: mpsc::Sender<PolledEvent>,
         events_receiver: mpsc::Receiver<PolledEvent>,
     ) -> Self {
-        let filesystem_layout = crate::get_filesystem_layout();
+        /*let filesystem_layout = crate::get_filesystem_layout();*/
 
         let running = Arc::new(RelaxedAtomic::new(true));
         let (requests_sender, requests_receiver) = mpsc::channel();
@@ -139,17 +139,17 @@ impl DataSources {
                                         )
                                     }
                                 }
-                                ServerRequest::FirewallRules(action) => {
-                                    if alvr_server_io::firewall_rules(action, &filesystem_layout)
+                                ServerRequest::FirewallRules(_action) => {
+                                    /*if alvr_server_io::firewall_rules(action, &filesystem_layout)
                                         .is_ok()
                                     {
                                         info!("Setting firewall rules succeeded!");
                                     } else {
                                         error!("Setting firewall rules failed!");
-                                    }
+                                    }*/
                                 }
                                 ServerRequest::RegisterAlvrDriver => {
-                                    let alvr_driver_dir =
+                                    /*let alvr_driver_dir =
                                         filesystem_layout.openvr_driver_root_dir.clone();
 
                                     alvr_server_io::driver_registration(&[alvr_driver_dir], true)
@@ -161,10 +161,10 @@ impl DataSources {
                                             &events_sender,
                                             EventType::DriversList(list),
                                         )
-                                    }
+                                    }*/
                                 }
-                                ServerRequest::UnregisterDriver(path) => {
-                                    alvr_server_io::driver_registration(&[path], false).ok();
+                                ServerRequest::UnregisterDriver(_path) => {
+                                    /*alvr_server_io::driver_registration(&[path], false).ok();
 
                                     if let Ok(list) = alvr_server_io::get_registered_drivers() {
                                         report_event_local(
@@ -172,7 +172,7 @@ impl DataSources {
                                             &events_sender,
                                             EventType::DriversList(list),
                                         )
-                                    }
+                                    }*/
                                 }
                                 ServerRequest::GetDriverList => {
                                     if let Ok(list) = alvr_server_io::get_registered_drivers() {

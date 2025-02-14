@@ -1,5 +1,6 @@
 use crate::{
-    logging_backend::LOGGING_EVENTS_SENDER, ConnectionContext, ServerCoreEvent, FILESYSTEM_LAYOUT,
+    logging_backend::LOGGING_EVENTS_SENDER, ConnectionContext,
+    ServerCoreEvent, /*FILESYSTEM_LAYOUT,*/
     SESSION_MANAGER,
 };
 use alvr_common::{
@@ -246,17 +247,17 @@ async fn http_api(
                     ServerRequest::StopRecording => {
                         *connection_context.video_recording_file.lock() = None
                     }
-                    ServerRequest::FirewallRules(action) => {
-                        if let Err(e) =
+                    ServerRequest::FirewallRules(_action) => {
+                        /*if let Err(e) =
                             alvr_server_io::firewall_rules(action, FILESYSTEM_LAYOUT.get().unwrap())
                         {
                             error!("Setting firewall rules failed! code: {e}");
                         } else {
                             info!("Setting firewall rules succeeded!");
-                        }
+                        }*/
                     }
                     ServerRequest::RegisterAlvrDriver => {
-                        alvr_server_io::driver_registration(
+                        /*alvr_server_io::driver_registration(
                             &[FILESYSTEM_LAYOUT
                                 .get()
                                 .unwrap()
@@ -268,14 +269,14 @@ async fn http_api(
 
                         if let Ok(list) = alvr_server_io::get_registered_drivers() {
                             alvr_events::send_event(EventType::DriversList(list));
-                        }
+                        }*/
                     }
-                    ServerRequest::UnregisterDriver(path) => {
-                        alvr_server_io::driver_registration(&[path], false).ok();
+                    ServerRequest::UnregisterDriver(_path) => {
+                        /*alvr_server_io::driver_registration(&[path], false).ok();
 
                         if let Ok(list) = alvr_server_io::get_registered_drivers() {
                             alvr_events::send_event(EventType::DriversList(list));
-                        }
+                        }*/
                     }
                     ServerRequest::GetDriverList => {
                         if let Ok(list) = alvr_server_io::get_registered_drivers() {
