@@ -1,8 +1,8 @@
 use alvr_gui_common::theme;
-use alvr_packets::{FirewallRulesAction, ServerRequest};
+use alvr_packets::{/*FirewallRulesAction,*/ ServerRequest};
 use eframe::{
-    egui::{Frame, Grid, Layout, RichText, Ui},
-    emath::Align,
+    egui::{Frame, Grid, /*Layout,*/ RichText, Ui},
+    /*emath::Align,*/
 };
 use std::{
     path::PathBuf,
@@ -49,7 +49,7 @@ impl InstallationTab {
             if ui.button("Run setup wizard").clicked() {
                 requests.push(InstallationTabRequest::OpenSetupWizard);
             }
-            ui.columns(2, |ui| {
+            /*ui.columns(2, |ui| {
                 if ui[0].button("Add firewall rules").clicked() {
                     requests.push(InstallationTabRequest::ServerRequest(
                         ServerRequest::FirewallRules(FirewallRulesAction::Add),
@@ -60,7 +60,7 @@ impl InstallationTab {
                         ServerRequest::FirewallRules(FirewallRulesAction::Remove),
                     ));
                 }
-            });
+            });*/
 
             Frame::group(ui.style())
                 .fill(theme::SECTION_BG)
@@ -76,22 +76,22 @@ impl InstallationTab {
                                 ui.add_space(5.0);
                                 ui.label(driver_path.to_string_lossy());
                             });
-                            ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                            /*ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
                                 if ui.button("Remove").clicked() {
                                     requests.push(InstallationTabRequest::ServerRequest(
                                         ServerRequest::UnregisterDriver(driver_path.clone()),
                                     ));
                                 }
-                            });
+                            });*/
                             ui.end_row();
                         }
                     });
 
-                    if ui.button("Register ALVR driver").clicked() {
+                    /*if ui.button("Register ALVR driver").clicked() {
                         requests.push(InstallationTabRequest::ServerRequest(
                             ServerRequest::RegisterAlvrDriver,
                         ));
-                    }
+                    }*/
                 });
         });
 

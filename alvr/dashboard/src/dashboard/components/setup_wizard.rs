@@ -1,4 +1,4 @@
-use alvr_packets::{FirewallRulesAction, ServerRequest};
+use alvr_packets::{/*FirewallRulesAction,*/ ServerRequest};
 use eframe::{
     egui::{Button, Label, Layout, RichText, Ui},
     emath::Align,
@@ -15,9 +15,8 @@ enum Page {
     ResetSettings = 1,
     HardwareRequirements = 2,
     SoftwareRequirements = 3,
-    Firewall = 4,
-    Recommendations = 5,
-    Finished = 6,
+    Recommendations = 4,
+    Finished = 5,
 }
 
 fn index_to_page(index: usize) -> Page {
@@ -26,9 +25,8 @@ fn index_to_page(index: usize) -> Page {
         1 => Page::ResetSettings,
         2 => Page::HardwareRequirements,
         3 => Page::SoftwareRequirements,
-        4 => Page::Firewall,
-        5 => Page::Recommendations,
-        6 => Page::Finished,
+        4 => Page::Recommendations,
+        5 => Page::Finished,
         _ => panic!("Invalid page index"),
     }
 }
@@ -125,19 +123,6 @@ Make sure you have at least one output audio device.",
                     if ui.button("Download VB-Cable").clicked() {
                         ui.ctx().open_url(crate::dashboard::egui::OpenUrl::same_tab(
                             "https://vb-audio.com/Cable/",
-                        ));
-                    }
-                },
-            ),
-            Page::Firewall => page_content(
-                ui,
-                "Firewall",
-                r"To communicate with the headset, some firewall rules need to be set.
-This requires administrator rights!",
-                |ui| {
-                    if ui.button("Add firewall rules").clicked() {
-                        request = Some(SetupWizardRequest::ServerRequest(
-                            ServerRequest::FirewallRules(FirewallRulesAction::Add),
                         ));
                     }
                 },

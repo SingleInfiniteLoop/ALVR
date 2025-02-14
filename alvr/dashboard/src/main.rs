@@ -81,14 +81,14 @@ fn main() {
             session_ref.session_settings.extra.open_setup_wizard = true;
         }
 
-        if session_manager
+        /*if session_manager
             .settings()
             .extra
             .steamvr_launcher
             .open_close_steamvr_with_dashboard
         {
             steamvr_launcher::LAUNCHER.lock().launch_steamvr()
-        }
+        }*/
     }
 
     let ico = IconDir::read(Cursor::new(include_bytes!("../resources/dashboard.ico"))).unwrap();
