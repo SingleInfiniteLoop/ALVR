@@ -730,6 +730,14 @@ pub struct VideoConfig {
     pub clientside_foveation: Switch<ClientsideFoveationConfig>,
 }
 
+#[derive(SettingsSchema, Serialize, Deserialize, Clone, Copy)]
+#[schema(gui = "button_group")]
+pub enum LinuxAudioBackend {
+    #[schema(strings(display_name = "ALSA"))]
+    Alsa,
+    Jack,
+}
+
 #[derive(SettingsSchema, Serialize, Deserialize, Clone)]
 #[schema(gui = "button_group")]
 pub enum CustomAudioDeviceConfig {
@@ -810,6 +818,9 @@ pub struct AudioConfig {
     )]
     #[cfg_attr(not(windows), schema(strings(display_name = "Headset microphone")))]
     pub microphone: Switch<MicrophoneConfig>,
+
+    #[schema(strings(help = "Audio backend"))]
+    pub linux_backend: LinuxAudioBackend,
 }
 
 #[derive(SettingsSchema, Serialize, Deserialize, Clone)]
@@ -1746,6 +1757,9 @@ pub fn session_settings_default() -> SettingsDefault {
             },
         },
         audio: AudioConfigDefault {
+            linux_backend: LinuxAudioBackendDefault {
+                variant: LinuxAudioBackendDefaultVariant::Alsa,
+            },
             game_audio: SwitchDefault {
                 enabled: true,
                 content: GameAudioConfigDefault {
