@@ -13,7 +13,9 @@ use alvr_common::{
     info,
     parking_lot::Mutex,
 };
-use alvr_session::{AudioBufferingConfig, CustomAudioDeviceConfig, MicrophoneDevicesConfig};
+use alvr_session::{
+    AudioBufferingConfig, CustomAudioDeviceConfig, LinuxAudioBackend, MicrophoneDevicesConfig,
+};
 use alvr_sockets::{StreamReceiver, StreamSender};
 use cpal::{
     BufferSize, Host, Sample, SampleFormat, StreamConfig,
@@ -51,7 +53,17 @@ fn device_from_custom_config(
     })
 }
 
-pub fn new_output(config: Option<&CustomAudioDeviceConfig>) -> Result<Device> {
+pub fn new_output(
+        linux_backend: Option<LinuxAudioBackend>,
+        config: Option<&CustomAudioDeviceConfig>,
+    ) -> Result<Device> {
+    #[cfg(target_os = "linux")]
+    let host = match linux_backend {
+        Some(LinuxAudioBackend::Alsa) => cpal::host_from_id(cpal::HostId::Alsa).unwrap(),
+        Some(LinuxAudioBackend::Jack) => cpal::host_from_id(cpal::HostId::Jack).unwrap(),
+        None => cpal::default_host(),
+    };
+    #[cfg(not(target_os = "linux"))]
     let host = cpal::default_host();
 
     let device = match config {
@@ -64,7 +76,17 @@ pub fn new_output(config: Option<&CustomAudioDeviceConfig>) -> Result<Device> {
     Ok(device)
 }
 
-pub fn new_input(config: Option<CustomAudioDeviceConfig>) -> Result<Device> {
+pub fn new_input(
+        linux_backend: Option<LinuxAudioBackend>,
+        config: Option<CustomAudioDeviceConfig>,
+    ) -> Result<Device> {
+    #[cfg(target_os = "linux")]
+    let host = match linux_backend {
+        Some(LinuxAudioBackend::Alsa) => cpal::host_from_id(cpal::HostId::Alsa).unwrap(),
+        Some(LinuxAudioBackend::Jack) => cpal::host_from_id(cpal::HostId::Jack).unwrap(),
+        None => cpal::default_host(),
+    };
+    #[cfg(not(target_os = "linux"))]
     let host = cpal::default_host();
 
     let device = match config {
@@ -78,8 +100,17 @@ pub fn new_input(config: Option<CustomAudioDeviceConfig>) -> Result<Device> {
 }
 
 // returns (sink, source)
-pub fn new_virtual_microphone_pair(config: MicrophoneDevicesConfig) -> Result<(Device, Device)> {
-    // No-op on Windows (this is windows specific code)
+pub fn new_virtual_microphone_pair(
+        linux_backend: Option<LinuxAudioBackend>,
+        config: MicrophoneDevicesConfig,
+    ) -> Result<(Device, Device)> {
+    #[cfg(target_os = "linux")]
+    let host = match linux_backend {
+        Some(LinuxAudioBackend::Alsa) => cpal::host_from_id(cpal::HostId::Alsa).unwrap(),
+        Some(LinuxAudioBackend::Jack) => cpal::host_from_id(cpal::HostId::Jack).unwrap(),
+        None => cpal::default_host(),
+    };
+    #[cfg(not(target_os = "linux"))]
     let host = cpal::default_host();
 
     let (sink_name, source_name) = match config {
@@ -94,7 +125,7 @@ pub fn new_virtual_microphone_pair(config: MicrophoneDevicesConfig) -> Result<(D
                 MicrophoneDevicesConfig::VoiceMeeterVaio3,
             ]
             .into_iter()
-            .find_map(|cable_type| new_virtual_microphone_pair(cable_type).ok())
+            .find_map(|cable_type| new_virtual_microphone_pair(linux_backend, cable_type).ok())
             .context("No microphones found");
         }
 
