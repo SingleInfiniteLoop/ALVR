@@ -3,9 +3,9 @@ mod parse;
 
 use alvr_common::anyhow::Result;
 use alvr_common::{dbg_connection, error};
-use alvr_system_info::{
+/*use alvr_system_info::{
     ClientFlavor, PACKAGE_NAME_GITHUB_DEV, PACKAGE_NAME_GITHUB_STABLE, PACKAGE_NAME_STORE,
-};
+};*/
 use std::collections::HashSet;
 
 pub enum WiredConnectionStatus {
@@ -20,19 +20,23 @@ pub struct WiredConnection {
 impl WiredConnection {
     pub fn new(
         layout: &alvr_filesystem::Layout,
-        download_progress_callback: impl Fn(usize, Option<usize>),
+        /*download_progress_callback: impl Fn(usize, Option<usize>),*/
     ) -> Result<Self> {
-        let adb_path = commands::require_adb(layout, download_progress_callback)?;
+        /*let adb_path = commands::require_adb(layout, download_progress_callback)?;
 
-        Ok(Self { adb_path })
+        Ok(Self { adb_path })*/
+        match commands::get_adb_path(layout) {
+            Some(path) => Ok(Self { adb_path: path }),
+            None => Err(anyhow::anyhow!("Failed to discover ADB installation path")),
+        }
     }
 
     pub fn setup(
         &self,
         control_port: u16,
         stream_port: u16,
-        client_type: &ClientFlavor,
-        client_autolaunch: bool,
+        /*client_type: &ClientFlavor,
+        client_autolaunch: bool,*/
     ) -> Result<WiredConnectionStatus> {
         let Some(device_serial) = commands::list_devices(&self.adb_path)?
             .into_iter()
@@ -58,7 +62,7 @@ impl WiredConnection {
             );
         }
 
-        let Some(process_name) = get_process_name(&self.adb_path, &device_serial, client_type)
+        /*let Some(process_name) = get_process_name(&self.adb_path, &device_serial, client_type)
         else {
             return Ok(WiredConnectionStatus::NotReady(
                 "No suitable ALVR client is installed".to_owned(),
@@ -82,7 +86,8 @@ impl WiredConnection {
             ))
         } else {
             Ok(WiredConnectionStatus::Ready)
-        }
+        }*/
+        Ok(WiredConnectionStatus::Ready)
     }
 }
 
@@ -95,7 +100,7 @@ impl Drop for WiredConnection {
     }
 }
 
-pub fn get_process_name(
+/*pub fn get_process_name(
     adb_path: &str,
     device_serial: &str,
     flavor: &ClientFlavor,
@@ -131,4 +136,4 @@ pub fn get_process_name(
                 .is_ok_and(|installed| installed)
         })
         .map(|name| (*name).to_string())
-}
+}*/

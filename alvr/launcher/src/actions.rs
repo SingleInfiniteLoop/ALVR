@@ -1,8 +1,8 @@
 use crate::{
     InstallationInfo, Progress, ReleaseChannelsInfo, ReleaseInfo, UiMessage, WorkerMessage,
 };
-use alvr_common::{anyhow::Result, semver::Version, ToAny};
-use anyhow::{bail, Context};
+use alvr_common::{anyhow::Result, /*semver::Version,*/ ToAny};
+use anyhow::{bail /*, Context*/};
 use flate2::read::GzDecoder;
 use futures_util::StreamExt;
 use std::{
@@ -152,7 +152,7 @@ fn install_and_launch_apk(
         file.write_all(&apk_buffer)?;
     }
 
-    let layout = alvr_filesystem::Layout::new(&root);
+    /*let layout = alvr_filesystem::Layout::new(&root);
     let adb_path = alvr_adb::commands::require_adb(&layout, |downloaded, total| {
         let progress = total.map_or(0.0, |t| downloaded as f32 / t as f32);
         worker_message_sender
@@ -195,7 +195,7 @@ fn install_and_launch_apk(
     }))?;
     alvr_adb::commands::install_package(&adb_path, &device_serial, &apk_path.to_string_lossy())?;
 
-    alvr_adb::commands::start_application(&adb_path, &device_serial, application_id)?;
+    alvr_adb::commands::start_application(&adb_path, &device_serial, application_id)?;*/
 
     Ok(())
 }

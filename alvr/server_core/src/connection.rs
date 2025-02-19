@@ -17,7 +17,7 @@ use alvr_common::{
     warn, AnyhowToCon, ConResult, ConnectionError, ConnectionState, LifecycleState, Pose,
     BUTTON_INFO, CONTROLLER_PROFILE_INFO, QUEST_CONTROLLER_PROFILE_PATH,
 };
-use alvr_events::{AdbEvent, ButtonEvent, EventType};
+use alvr_events::{/*AdbEvent,*/ ButtonEvent, EventType};
 use alvr_packets::{
     ClientConnectionResult, ClientControlPacket, ClientListAction, ClientStatistics,
     NegotiatedStreamingConfig, RealTimeConfig, ReservedClientControlPacket, ServerControlPacket,
@@ -274,13 +274,13 @@ pub fn handshake_loop(ctx: Arc<ConnectionContext>, lifecycle_state: Arc<RwLock<L
             } else {
                 let connection = match WiredConnection::new(
                     FILESYSTEM_LAYOUT.get().unwrap(),
-                    |downloaded, maybe_total| {
+                    /*|downloaded, maybe_total| {
                         if let Some(total) = maybe_total {
                             alvr_events::send_event(EventType::Adb(AdbEvent {
                                 download_progress: downloaded as f32 / total as f32,
                             }));
                         };
-                    },
+                    },*/
                 ) {
                     Ok(connection) => connection,
                     Err(e) => {
@@ -296,21 +296,21 @@ pub fn handshake_loop(ctx: Arc<ConnectionContext>, lifecycle_state: Arc<RwLock<L
             };
 
             let stream_port;
-            let client_type;
-            let client_autolaunch;
+            /*let client_type;
+            let client_autolaunch;*/
             {
                 let session_manager_lock = SESSION_MANAGER.read();
                 let connection = &session_manager_lock.settings().connection;
                 stream_port = connection.stream_port;
-                client_type = connection.wired_client_type.clone();
-                client_autolaunch = connection.wired_client_autolaunch;
+                /*client_type = connection.wired_client_type.clone();
+                client_autolaunch = connection.wired_client_autolaunch;*/
             }
 
             let status = match wired_connection.setup(
                 CONTROL_PORT,
                 stream_port,
-                &client_type,
-                client_autolaunch,
+                /*&client_type,
+                client_autolaunch,*/
             ) {
                 Ok(status) => status,
                 Err(e) => {

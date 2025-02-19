@@ -2,15 +2,15 @@
 
 use crate::parse::{self, Device, ForwardedPorts};
 use alvr_filesystem::Layout;
-use anyhow::{anyhow, Context, Result};
+use anyhow::{/*anyhow,*/ Context, Result};
 use std::{
-    collections::HashSet,
-    io::{Cursor, Read},
+    /*collections::HashSet,*/
+    io::{/*Cursor,*/ Read},
     path::PathBuf,
     process::Command,
     time::Duration,
 };
-use zip::ZipArchive;
+/*use zip::ZipArchive;*/
 
 #[cfg(windows)]
 use std::os::windows::process::CommandExt;
@@ -19,14 +19,14 @@ use std::os::windows::process::CommandExt;
 // NOTE: At the time of writing this comment, the revisions section above
 // shows the latest version as 35.0.2, but the latest that can be downloaded
 // by specifying a version is 35.0.0
-const PLATFORM_TOOLS_VERSION: &str = "-latest"; // E.g. "_r35.0.0"
+/*const PLATFORM_TOOLS_VERSION: &str = "-latest"; // E.g. "_r35.0.0"
 
 #[cfg(target_os = "linux")]
 const PLATFORM_TOOLS_OS: &str = "linux";
 #[cfg(target_os = "macos")]
 const PLATFORM_TOOLS_OS: &str = "darwin";
 #[cfg(windows)]
-const PLATFORM_TOOLS_OS: &str = "windows";
+const PLATFORM_TOOLS_OS: &str = "windows";*/
 
 const REQUEST_TIMEOUT: Duration = Duration::from_secs(5);
 
@@ -71,7 +71,7 @@ pub fn download(url: &str, progress_callback: impl Fn(usize, Option<usize>)) -> 
 ///////////
 // Activity
 
-pub fn get_process_id(
+/*pub fn get_process_id(
     adb_path: &str,
     device_serial: &str,
     process_name: &str,
@@ -187,7 +187,7 @@ pub fn start_application(adb_path: &str, device_serial: &str, application_id: &s
     .context(format!("Failed to start {application_id}"))?;
 
     Ok(())
-}
+}*/
 
 //////////
 // Devices
@@ -209,7 +209,7 @@ pub fn list_devices(adb_path: &str) -> Result<Vec<Device>> {
 ///////////
 // Packages
 
-pub fn install_package(adb_path: &str, device_serial: &str, apk_path: &str) -> Result<()> {
+/*pub fn install_package(adb_path: &str, device_serial: &str, apk_path: &str) -> Result<()> {
     get_command(adb_path, &["-s", device_serial, "install", "-r", apk_path])
         .output()
         .context(format!("Failed to install {apk_path}"))?;
@@ -253,13 +253,13 @@ pub fn list_installed_packages(adb_path: &str, device_serial: &str) -> Result<Ha
     let packages = text.lines().map(|l| l.replace("package:", "")).collect();
 
     Ok(packages)
-}
+}*/
 
 ////////
 // Paths
 
 /// Returns the path of a local (i.e. installed by ALVR) or OS version of `adb` if found, `None` otherwise.
-fn get_adb_path(layout: &Layout) -> Option<String> {
+pub fn get_adb_path(layout: &Layout) -> Option<String> {
     get_os_adb_path().or(get_local_adb_path(layout))
 }
 
