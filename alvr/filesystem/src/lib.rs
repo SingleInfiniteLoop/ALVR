@@ -129,8 +129,7 @@ impl Layout {
 
             let config_dir = option_env!("ALVR_CONFIG_DIR")
                 .map_or_else(|| dirs::config_dir().unwrap().join("alvr"), PathBuf::from);
-            let log_dir = option_env!("ALVR_LOG_DIR")
-                .map_or_else(|| dirs::home_dir().unwrap(), PathBuf::from);
+            let log_dir = option_env!("ALVR_LOG_DIR").map_or(env::temp_dir(), PathBuf::from);
 
             Self {
                 executables_dir,
@@ -207,7 +206,11 @@ impl Layout {
     }
 
     pub fn crash_log(&self) -> PathBuf {
-        self.log_dir.join("crash_log.txt")
+        if cfg!(target_os = "linux") {
+            self.log_dir.join("alvr_crash_log.txt")
+        } else {
+            self.log_dir.join("crash_log.txt")
+        }
     }
 
     pub fn openvr_driver_lib_dir(&self) -> PathBuf {
