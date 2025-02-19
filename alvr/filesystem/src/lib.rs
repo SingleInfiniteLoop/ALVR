@@ -132,7 +132,7 @@ impl Layout {
             let log_dir = if !env!("log_dir").is_empty() {
                 PathBuf::from(env!("log_dir"))
             } else {
-                dirs::home_dir().unwrap()
+                env::temp_dir()
             };
             let openvr_driver_root_dir = if !env!("openvr_driver_root_dir").is_empty() {
                 PathBuf::from(env!("openvr_driver_root_dir"))
@@ -240,7 +240,11 @@ impl Layout {
     }
 
     pub fn crash_log(&self) -> PathBuf {
-        self.log_dir.join("crash_log.txt")
+        if cfg!(target_os = "linux") {
+            self.log_dir.join("alvr_crash_log.txt")
+        } else {
+            self.log_dir.join("crash_log.txt")
+        }
     }
 
     pub fn openvr_driver_lib_dir(&self) -> PathBuf {
