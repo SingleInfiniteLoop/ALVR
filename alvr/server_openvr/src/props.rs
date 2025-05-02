@@ -17,11 +17,11 @@ use alvr_session::{
     ControllersEmulationMode, HeadsetEmulationMode, OpenvrPropKey, OpenvrPropType, OpenvrProperty,
 };
 use std::{
-    ffi::{c_char, c_void, CString},
+    ffi::{c_char, CString},
     ptr,
 };
 
-pub fn set_openvr_prop(instance_ptr: Option<*mut c_void>, device_id: u64, prop: OpenvrProperty) {
+pub fn set_openvr_prop(device_id: u64, prop: OpenvrProperty) {
     let key = prop.key as u32;
     let ty = alvr_session::openvr_prop_key_to_type(prop.key);
     let value = prop.value;
@@ -102,16 +102,15 @@ pub fn set_openvr_prop(instance_ptr: Option<*mut c_void>, device_id: u64, prop: 
 
     debug!("Setting {device_name} OpenVR prop: {:?}={value}", prop.key);
 
-    let ffi_prop = FfiOpenvrProperty {
-        key,
-        type_,
-        value: ffi_value,
-    };
-
-    if let Some(instance_ptr) = instance_ptr {
-        unsafe { crate::SetOpenvrProperty(instance_ptr, ffi_prop) }
-    } else {
-        unsafe { crate::SetOpenvrPropByDeviceID(device_id, ffi_prop) }
+    unsafe {
+        crate::SetOpenvrProperty(
+            device_id,
+            FfiOpenvrProperty {
+                key,
+                type_,
+                value: ffi_value,
+            },
+        );
     }
 }
 
@@ -189,7 +188,7 @@ pub extern "C" fn get_serial_number(device_id: u64, out_str: *mut c_char) -> u64
 }
 
 #[no_mangle]
-pub extern "C" fn set_device_openvr_props(instance_ptr: *mut c_void, device_id: u64) {
+pub extern "C" fn set_device_openvr_props(device_id: u64) {
     #[expect(clippy::enum_glob_use)]
     use OpenvrPropKey::*;
 
@@ -197,7 +196,6 @@ pub extern "C" fn set_device_openvr_props(instance_ptr: *mut c_void, device_id: 
 
     let set_prop = |key, value: &str| {
         set_openvr_prop(
-            Some(instance_ptr),
             device_id,
             OpenvrProperty {
                 key,

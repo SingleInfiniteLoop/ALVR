@@ -15,8 +15,12 @@ mod bindings {
 use bindings::*;
 
 use alvr_common::{
-    error, once_cell::sync::Lazy, parking_lot::RwLock, settings_schema::Switch, warn, BUTTON_INFO,
-    HAND_LEFT_ID, HAND_RIGHT_ID, HAND_TRACKER_LEFT_ID, HAND_TRACKER_RIGHT_ID, HEAD_ID,
+    error,
+    once_cell::sync::Lazy,
+    parking_lot::{Mutex, RwLock},
+    settings_schema::Switch,
+    warn, BUTTON_INFO, HAND_LEFT_ID, HAND_RIGHT_ID, HAND_TRACKER_LEFT_ID, HAND_TRACKER_RIGHT_ID,
+    HEAD_ID,
 };
 use alvr_filesystem as afs;
 use alvr_packets::{ButtonValue, Haptics};
@@ -32,9 +36,23 @@ use std::{
 
 static SERVER_CORE_CONTEXT: Lazy<RwLock<Option<ServerCoreContext>>> =
     Lazy::new(|| RwLock::new(None));
+static EVENTS_RECEIVER: Lazy<Mutex<Option<mpsc::Receiver<ServerCoreEvent>>>> =
+    Lazy::new(|| Mutex::new(None));
 
-fn event_loop(events_receiver: mpsc::Receiver<ServerCoreEvent>) {
+extern "C" fn driver_ready_idle(set_default_chap: bool) {
     thread::spawn(move || {
+        let events_receiver = EVENTS_RECEIVER.lock().take().unwrap();
+
+        unsafe { InitOpenvrClient() };
+
+        if set_default_chap {
+            // call this when inside a new thread. Calling this on the parent thread will crash
+            // SteamVR
+            unsafe {
+                SetChaperoneArea(2.0, 2.0);
+            }
+        }
+
         if let Some(context) = &*SERVER_CORE_CONTEXT.read() {
             context.start_connection();
         }
@@ -49,18 +67,14 @@ fn event_loop(events_receiver: mpsc::Receiver<ServerCoreEvent>) {
 
             match event {
                 ServerCoreEvent::SetOpenvrProperty { device_id, prop } => {
-                    props::set_openvr_prop(None, device_id, prop)
+                    props::set_openvr_prop(device_id, prop)
                 }
-                ServerCoreEvent::ClientConnected => unsafe {
-                    if InitializeStreaming() {
+                ServerCoreEvent::ClientConnected => {
+                    unsafe {
+                        InitializeStreaming();
                         RequestDriverResync();
-                    } else {
-                        SERVER_CORE_CONTEXT.write().take();
-
-                        ShutdownSteamvr();
-                    }
-                },
-
+                    };
+                }
                 ServerCoreEvent::ClientDisconnected => unsafe { DeinitializeStreaming() },
                 ServerCoreEvent::Battery(info) => unsafe {
                     SetBattery(info.device_id, info.gauge_value, info.is_plugged)
@@ -268,22 +282,7 @@ fn event_loop(events_receiver: mpsc::Receiver<ServerCoreEvent>) {
     });
 }
 
-extern "C" fn driver_ready_idle(set_default_chap: bool) {
-    thread::spawn(move || {
-        unsafe { InitOpenvrClient() };
-
-        if set_default_chap {
-            // call this when inside a new thread. Calling this on the parent thread will crash SteamVR
-            unsafe {
-                SetChaperoneArea(2.0, 2.0);
-            }
-        }
-    });
-}
-
-/// # Safety
-/// `instance_ptr` is a valid pointer to a `TrackedDevice` instance
-pub unsafe extern "C" fn register_buttons(instance_ptr: *mut c_void, device_id: u64) {
+pub extern "C" fn register_buttons(device_id: u64) {
     let mapped_device_id = if device_id == *HAND_TRACKER_LEFT_ID {
         *HAND_LEFT_ID
     } else if device_id == *HAND_TRACKER_RIGHT_ID {
@@ -292,13 +291,13 @@ pub unsafe extern "C" fn register_buttons(instance_ptr: *mut c_void, device_id: 
         device_id
     };
 
-    for button_id in alvr_server_core::registered_button_set() {
-        if let Some(info) = BUTTON_INFO.get(&button_id) {
+    for id in alvr_server_core::registered_button_set() {
+        if let Some(info) = BUTTON_INFO.get(&id) {
             if info.device_id == mapped_device_id {
-                unsafe { RegisterButton(instance_ptr, button_id) };
+                unsafe { RegisterButton(device_id, id) };
             }
         } else {
-            error!("Cannot register unrecognized button ID {button_id}");
+            error!("Cannot register unrecognized button ID {id}");
         }
     }
 }
@@ -492,8 +491,7 @@ pub unsafe extern "C" fn HmdDriverFactory(
         let (context, events_receiver) = ServerCoreContext::new();
 
         *SERVER_CORE_CONTEXT.write() = Some(context);
-
-        event_loop(events_receiver);
+        *EVENTS_RECEIVER.lock() = Some(events_receiver);
     });
 
     CppOpenvrEntryPoint(interface_name, return_code)

@@ -1,8 +1,6 @@
 #include "TrackedDevice.h"
 #include "Logger.h"
 #include "Utils.h"
-#include <chrono>
-#include <thread>
 
 TrackedDevice::TrackedDevice(uint64_t device_id, vr::ETrackedDeviceClass device_class)
     : device_id(device_id)
@@ -24,6 +22,16 @@ std::string TrackedDevice::get_serial_number() {
     GetSerialNumber(this->device_id, &buffer[0]);
 
     return std::string(&buffer[0]);
+}
+
+void TrackedDevice::register_device() {
+    if (!vr::VRServerDriverHost()->TrackedDeviceAdded(
+            this->get_serial_number().c_str(),
+            this->device_class,
+            (vr::ITrackedDeviceServerDriver*)this
+        )) {
+        Error("Failed to register device");
+    }
 }
 
 void TrackedDevice::set_prop(FfiOpenvrProperty prop) {
@@ -83,40 +91,9 @@ void TrackedDevice::submit_pose(vr::DriverPose_t pose) {
     );
 }
 
-bool TrackedDevice::register_device() {
-    if (!vr::VRServerDriverHost()->TrackedDeviceAdded(
-            this->get_serial_number().c_str(),
-            this->device_class,
-            (vr::ITrackedDeviceServerDriver*)this
-        )) {
-        Error("Failed to register device (%s)", this->get_serial_number().c_str());
-
-        return false;
-    }
-
-    auto lock = std::unique_lock<std::mutex>(this->activation_mutex);
-    this->activation_condvar.wait_for(lock, std::chrono::seconds(1), [this] {
-        return this->activation_state != ActivationState::Pending;
-    });
-
-    return this->activation_state == ActivationState::Success;
-}
-
 vr::EVRInitError TrackedDevice::Activate(vr::TrackedDeviceIndex_t object_id) {
     this->object_id = object_id;
     this->prop_container = vr::VRProperties()->TrackedDeviceToPropertyContainer(this->object_id);
 
-    {
-        auto guard = std::lock_guard<std::mutex>(this->activation_mutex);
-
-        if (this->activate()) {
-            this->activation_state = ActivationState::Success;
-        } else {
-            this->activation_state = ActivationState::Failure;
-        }
-    }
-    this->activation_condvar.notify_one();
-
-    return this->activation_state == ActivationState::Success ? vr::VRInitError_None
-                                                              : vr::VRInitError_Driver_Failed;
+    return activate() ? vr::VRInitError_None : vr::VRInitError_Driver_Failed;
 }
