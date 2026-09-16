@@ -100,6 +100,10 @@ fn main() {
         },
         {
             Box::new(move |creation_context| {
+                creation_context.egui_ctx.tessellation_options_mut(|opts| {
+                    opts.feathering = false;
+                });
+
                 let data_source = DataSources::new(
                     creation_context.egui_ctx.clone(),
                     server_events_sender,
@@ -122,6 +126,9 @@ fn main() {
         eframe::WebRunner::new()
             .start("dashboard_canvas", eframe::WebOptions::default(), {
                 Box::new(move |creation_context| {
+                    creation_context.egui_ctx.tessellation_options_mut(|opts| {
+                        opts.feathering = false;
+                    });
                     let context = creation_context.egui_ctx.clone();
                     Box::new(Dashboard::new(creation_context, DataSources::new(context)))
                 })
